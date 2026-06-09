@@ -33,8 +33,8 @@ API REST en **Spring Boot 3.5.14** para la gestión de **estudiantes, materias y
 
 ## Estructura del proyecto
 
-```plain text
-ParcialFinal-Arquitectura/
+```
+.                                          # raíz del repositorio (ParcialFinal-Arquitectura)
 ├── docs/
 │   └── swagger.png                       # Captura de Swagger UI
 ├── src/
@@ -112,7 +112,7 @@ git clone https://github.com/Isa-Bedoya-UdeA/ParcialFinal-Arquitectura.git
 cd ParcialFinal-Arquitectura
 ```
 
-> La estructura contiene el proyecto Spring Boot en la raíz. Si tu entrega separó `parcialFinal/` como submódulo, ajusta el `cd` correspondiente.
+> Al clonar se crea la carpeta `ParcialFinal-Arquitectura/`. Los archivos del proyecto Spring Boot (`pom.xml`, `src/`, `docs/`, etc.) están en la **raíz** de esa carpeta, así que `mvn` se puede ejecutar directamente sin hacer más `cd`.
 
 ### 2. Verificar requisitos
 
