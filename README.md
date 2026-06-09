@@ -152,7 +152,19 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 springdoc.swagger-ui.path=/swagger-ui.html
 ```
 
-### 5. Compilar y ejecutar
+### 5. Seed de datos
+
+Cargar los datos iniciales (8 estudiantes, 6 materias, 16 notas):
+
+```bash
+psql -U postgres -d colegioudea -f seed.sql
+```
+
+### 6. Compilar y ejecutar
+
+Puedes ejecutar el proyecto de dos formas:
+
+#### Opción A: Maven (local)
 
 Los siguientes comandos están pensados para **PowerShell** en Windows:
 
@@ -177,7 +189,27 @@ Started ParcialFinalApplication in 3.42 seconds (process running for 3.87)
 Tomcat started on port 8080 (http)
 ```
 
-### 6. Probar la API
+#### Opción B: Docker
+
+Requisito: tener **Docker** instalado y PostgreSQL corriendo en `localhost:5432`.
+
+```bash
+# 1. Construir la imagen
+docker build -t parcialfinal .
+
+# 2. Ejecutar el contenedor (usando la red del host para conectar a PostgreSQL local)
+docker run --network host --name parcialfinal-app -d parcialfinal
+
+# 3. Verificar que está corriendo
+curl http://localhost:8080/api/v1/health
+
+# 4. Detener y eliminar el contenedor
+docker rm -f parcialfinal-app
+```
+
+> **Nota:** Se usa `--network host` para que el contenedor acceda a PostgreSQL en `localhost:5432` sin necesidad de configurar redes adicionales. Esto funciona en Linux. En macOS/Windows, usa `-p 8080:8080` y asegúrate de que PostgreSQL sea accesible desde dentro del contenedor.
+
+### 7. Probar la API
 
 | Recurso | URL |
 | --- | --- |
@@ -300,6 +332,22 @@ Mapeo de excepciones:
 | `ReglaNegocioException` | 400 Bad Request |
 | `MethodArgumentNotValidException` (fallo de `@Valid`) | 400 Bad Request |
 | Cualquier otra excepción no controlada | 500 Internal Server Error |
+
+---
+
+## Pruebas de integración
+
+Se ejecutaron 72 asserts sobre los 3 endpoints de la API usando contenedores Docker. Los resultados completos con requests y responses en JSON están documentados en:
+
+👉 [**Evidencia de Pruebas**](docs/evidencia-pruebas.md)
+
+Ejecución rápida:
+
+```bash
+bash tests-sh/run-all.sh
+```
+
+El script construye la imagen Docker, levanta el contenedor, re-seedea la BD, ejecuta todos los tests y limpia el contenedor al finalizar.
 
 ---
 
