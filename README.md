@@ -303,6 +303,22 @@ Mapeo de excepciones:
 
 ---
 
+## Pruebas de integración
+
+Se ejecutaron 72 asserts sobre los 3 endpoints de la API usando contenedores Docker. Los resultados completos con requests y responses en JSON están documentados en:
+
+👉 [**Evidencia de Pruebas**](docs/evidencia-pruebas.md)
+
+Ejecución rápida:
+
+```bash
+bash tests-sh/run-all.sh
+```
+
+El script construye la imagen Docker, levanta el contenedor, re-seedea la BD, ejecuta todos los tests y limpia el contenedor al finalizar.
+
+---
+
 ## Captura de Swagger UI
 
 ![Screenshot de la vista de Swagger](docs/swagger.png)
