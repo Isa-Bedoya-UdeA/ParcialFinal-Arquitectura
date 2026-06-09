@@ -1,6 +1,8 @@
-# Parcial Final — Arquitectura de Software
+# Parcial Final — Arquitectura de Software (Backend)
 
 API REST en **Spring Boot 3.5.14** para la gestión de **estudiantes, materias y notas** de un colegio, con persistencia en **PostgreSQL**, documentación con **Swagger / OpenAPI** y versionamiento de endpoints por URI (`/api/v1/...`).
+
+> **Repositorio del frontend (React + TypeScript + Vite):** [https://github.com/Mista299/examen-arqui-frontend](https://github.com/Mista299/examen-arqui-frontend)
 
 ---
 
@@ -8,9 +10,9 @@ API REST en **Spring Boot 3.5.14** para la gestión de **estudiantes, materias y
 
 | # | Nombre completo | Documento | Correo institucional |
 | - | --- | --- | --- |
-| 1 | Maria Fernanda Atencia | C.C. | [mariaf.atencia@udea.edu.co](mariaf.atencia@udea.edu.co) |
-| 2 | Michael Stiven Tabares | C.C. | [michael.tabares@udea.edu.co](michael.tabares@udea.edu.co) |
-| 3 | Isabela Bedoya | C.C. 1020106520 | [isabela.bedoya@udea.edu.co](isabela.bedoya@udea.edu.co) |
+| 1 | Maria Fernanda Atencia | C.C. | [mariaf.atencia@udea.edu.co](mailto:mariaf.atencia@udea.edu.co) |
+| 2 | Michael Stiven Tabares | C.C. | [michael.tabares@udea.edu.co](mailto:michael.tabares@udea.edu.co) |
+| 3 | Isabela Bedoya | C.C. 1020106520 | [isabela.bedoya@udea.edu.co](mailto:isabela.bedoya@udea.edu.co) |
 
 **Asignatura:** Arquitectura de Software — Semestre 7
 **Programa:** Ingeniería de Sistemas — Universidad de Antioquia (UdeA)
@@ -304,6 +306,12 @@ Mapeo de excepciones:
 ## Captura de Swagger UI
 
 ![Screenshot de la vista de Swagger](docs/swagger.png)
+
+---
+
+## Repositorio relacionado
+
+- **Frontend (React 19, TypeScript, Vite, Tailwind CSS):** [https://github.com/Mista299/examen-arqui-frontend](https://github.com/Mista299/examen-arqui-frontend)
 
 ---
 
