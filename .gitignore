@@ -4,6 +4,13 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# Variables de entorno (secretos) — solo .env.example se commitea
+.env
+.env.local
+backend.log
+backend.err
+backend.pid
+
 ### STS ###
 .apt_generated
 .classpath

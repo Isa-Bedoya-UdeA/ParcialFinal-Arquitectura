@@ -357,6 +357,17 @@ El script construye la imagen Docker, levanta el contenedor, re-seedea la BD, ej
 
 ---
 
+## Pruebas Frontend
+
+![Dashboard](./docs/pruebasFront/dashboard.png)
+![Estudiantes](./docs/pruebasFront/estudiantes.png)
+![Materias](./docs/pruebasFront/materias.png)
+![Registro de notas](./docs/pruebasFront/registro.png)
+![Notas del estudiante 1](./docs/pruebasFront/notas1.png)
+![Notas del estudiante 2](./docs/pruebasFront/notas2.png)
+
+---
+
 ## Repositorio relacionado
 
 - **Frontend (React 19, TypeScript, Vite, Tailwind CSS):** [https://github.com/Mista299/examen-arqui-frontend](https://github.com/Mista299/examen-arqui-frontend)
