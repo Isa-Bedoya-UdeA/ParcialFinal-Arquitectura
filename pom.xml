@@ -8,7 +8,7 @@
         <version>3.5.14</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.codefactory</groupId>
+    <groupId>com.udea</groupId>
     <artifactId>parcialFinal</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>parcialFinal</name>
@@ -56,6 +56,13 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- H2: solo para tests en memoria, no afecta a la app real -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
