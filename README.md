@@ -357,6 +357,12 @@ El script construye la imagen Docker, levanta el contenedor, re-seedea la BD, ej
 
 ---
 
+## Diagrama Paquetes y Componentes
+
+![Diagrama Paquetes y Componentes](docs/arquitectura.png)
+
+---
+
 ## Pruebas Frontend
 
 ![Dashboard](./docs/pruebasFront/dashboard.png)
