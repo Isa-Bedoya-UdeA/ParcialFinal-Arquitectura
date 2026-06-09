@@ -2,7 +2,7 @@
 # Funciones compartidas para los tests de API
 # Se importa con: source tests-sh/common.sh
 
-BASE="http://localhost:8080"
+BASE="${BASE:-http://localhost:8080}"
 PASS=0
 FAIL=0
 

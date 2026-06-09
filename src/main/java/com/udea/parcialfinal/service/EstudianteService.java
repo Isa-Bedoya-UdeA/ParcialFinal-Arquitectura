@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.udea.parcialfinal.dto.EstudianteConNotasDTO;
+import com.udea.parcialfinal.dto.EstudianteDTO;
 import com.udea.parcialfinal.dto.NotaResponseDTO;
 import com.udea.parcialfinal.exception.RecursoNoEncontradoException;
 import com.udea.parcialfinal.model.Estudiante;
@@ -17,7 +18,8 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Lógica de negocio para Estudiantes.
- * Hoy expone la consulta de notas por cédula que requiere el parcial.
+ * Hoy expone la consulta de notas por cédula que requiere el parcial,
+ * más la lista completa y la consulta por cédula para el frontend.
  */
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,28 @@ public class EstudianteService {
 
     private final EstudianteRepository estudianteRepo;
     private final NotaRepository notaRepo;
+
+    /**
+     * Lista todos los estudiantes registrados.
+     */
+    @Transactional(readOnly = true)
+    public List<EstudianteDTO> listarTodos() {
+        return estudianteRepo.findAll().stream()
+                .map(EstudianteDTO::from)
+                .toList();
+    }
+
+    /**
+     * Devuelve un estudiante por su cédula.
+     * Lanza RecursoNoEncontradoException (→ 404) si no existe.
+     */
+    @Transactional(readOnly = true)
+    public EstudianteDTO obtenerPorCedula(String cedula) {
+        Estudiante estudiante = estudianteRepo.findByCedula(cedula)
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "No existe un estudiante con la cédula " + cedula));
+        return EstudianteDTO.from(estudiante);
+    }
 
     /**
      * Devuelve el estudiante con todas sus notas registradas.

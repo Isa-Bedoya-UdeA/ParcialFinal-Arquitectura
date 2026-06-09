@@ -1,5 +1,7 @@
 package com.udea.parcialfinal.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +20,8 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Lógica de negocio para Notas.
- * Hoy expone el registro de una nota nueva a partir de la cédula y el código de materia.
+ * Hoy expone el registro de una nota nueva a partir de la cédula y el código de materia,
+ * más la lista completa y la consulta por id para el frontend.
  */
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,28 @@ public class NotaService {
     private final NotaRepository notaRepo;
     private final EstudianteRepository estudianteRepo;
     private final MateriaRepository materiaRepo;
+
+    /**
+     * Lista todas las notas registradas en el sistema.
+     */
+    @Transactional(readOnly = true)
+    public List<NotaResponseDTO> listarTodas() {
+        return notaRepo.findAll().stream()
+                .map(NotaResponseDTO::from)
+                .toList();
+    }
+
+    /**
+     * Devuelve una nota por su id.
+     * Lanza RecursoNoEncontradoException (→ 404) si no existe.
+     */
+    @Transactional(readOnly = true)
+    public NotaResponseDTO obtenerPorId(Long id) {
+        Nota nota = notaRepo.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "No existe una nota con id " + id));
+        return NotaResponseDTO.from(nota);
+    }
 
     /**
      * Crea una nueva nota validando que existan el estudiante y la materia.
