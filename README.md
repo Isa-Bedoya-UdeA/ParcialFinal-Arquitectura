@@ -43,17 +43,29 @@ API REST en **Spring Boot 3.5.14** para la gestión de **estudiantes, materias y
 │   ├── main/
 │   │   ├── java/com/udea/parcialfinal/
 │   │   │   ├── ParcialFinalApplication.java   # Punto de entrada de Spring Boot
+│   │   │   ├── assembler/                          # RepresentationModelAssemblers HATEOAS
+│   │   │   │   ├── EstudianteModelAssembler.java          # → /api/v1/estudiantes
+│   │   │   │   ├── EstudianteConNotasModelAssembler.java  # → /api/v1/estudiantes/{cedula}/notas
+│   │   │   │   ├── MateriaModelAssembler.java             # → /api/v1/materias
+│   │   │   │   └── NotaModelAssembler.java                # → /api/v1/notas
 │   │   │   ├── config/
-│   │   │   │   └── OpenApiConfig.java         # Metadata de Swagger/OpenAPI
+│   │   │   │   ├── OpenApiConfig.java         # Metadata de Swagger/OpenAPI
+│   │   │   │   └── CorsConfig.java            # CORS global para /api/** (frontend en 5173)
 │   │   │   ├── controller/
-│   │   │   │   ├── EstudianteController.java  # GET  /api/v1/estudiantes/{cedula}/notas
-│   │   │   │   ├── NotaController.java        # POST /api/v1/notas
-│   │   │   │   └── HealthController.java      # GET  /api/v1/health
+│   │   │   │   ├── EstudianteController.java  # GET /estudiantes, /estudiantes/{cedula}, /estudiantes/{cedula}/notas
+│   │   │   │   ├── NotaController.java        # GET /notas, /notas/{id} + POST /notas
+│   │   │   │   ├── MateriaController.java     # GET /materias, /materias/{codigo}
+│   │   │   │   ├── DashboardController.java   # GET /dashboard/stats, /dashboard/promedios-por-materia
+│   │   │   │   └── HealthController.java      # GET /api/v1/health
 │   │   │   ├── dto/
 │   │   │   │   ├── EstudianteConNotasDTO.java # Salida del GET (datos del estudiante + notas)
+│   │   │   │   ├── EstudianteDTO.java         # DTO base de estudiante (id, cedula, nombre, ...)
+│   │   │   │   ├── MateriaDTO.java            # DTO de materia con todos sus campos
 │   │   │   │   ├── MateriaSimpleDTO.java      # Materia anidada en NotaResponseDTO
 │   │   │   │   ├── NotaRequestDTO.java        # Body del POST
-│   │   │   │   └── NotaResponseDTO.java       # Salida del POST
+│   │   │   │   ├── NotaResponseDTO.java       # Salida del POST
+│   │   │   │   ├── DashboardStatsDTO.java     # Stats para el dashboard del frontend
+│   │   │   │   └── PromedioMateriaDTO.java    # Promedio agrupado por materia
 │   │   │   ├── exception/
 │   │   │   │   ├── ErrorResponse.java              # DTO uniforme de error
 │   │   │   │   ├── GlobalExceptionHandler.java     # @RestControllerAdvice
@@ -69,12 +81,23 @@ API REST en **Spring Boot 3.5.14** para la gestión de **estudiantes, materias y
 │   │   │   │   └── NotaRepository.java
 │   │   │   └── service/
 │   │   │       ├── EstudianteService.java
-│   │   │       └── NotaService.java
+│   │   │       ├── NotaService.java
+│   │   │       ├── MateriaService.java          # Lógica de materias
+│   │   │       └── DashboardService.java        # Stats agregadas para el dashboard
 │   │   └── resources/
-│   │       └── application.properties   # Configuración de datasource y JPA
+│   │       └── application.properties   # Usa ${POSTGRES_*} — valores leídos desde .env
 │   └── test/
 │       └── resources/
 │           └── application.properties   # Configuración de H2 en memoria para tests
+├── tests-sh/                              # Tests de API hechos en bash + curl + jq
+│   ├── common.sh
+│   ├── test-health.sh
+│   ├── test-estudiantes-notas.sh
+│   ├── test-notas.sh
+│   └── run-all.sh                        # Runner con Docker (build + seed + tests + cleanup)
+├── .env.example                          # Plantilla de variables de entorno (sí se commitea)
+├── .env                                  # Variables reales (NO se commitea, ver .gitignore)
+├── seed.sql                              # Datos iniciales: 8 estudiantes, 6 materias, 16 notas
 ├── pom.xml
 └── README.md
 ```
@@ -90,6 +113,8 @@ API REST en **Spring Boot 3.5.14** para la gestión de **estudiantes, materias y
 | `spring-boot-starter-validation` | compile | Anotaciones `@NotBlank`, `@NotNull`, `@DecimalMin`, `@DecimalMax`, `@Valid` en DTOs y controllers |
 | `spring-boot-starter-hateoas` | compile | Soporte para **HATEOAS** (hipermedia en las respuestas REST, p. ej. `EntityModel`, `Link`) |
 | `springdoc-openapi-starter-webmvc-ui` (2.8.16) | compile | Swagger UI y OpenAPI JSON (usado en `OpenApiConfig` y anotaciones en controllers) |
+| `me.paulschwarz:spring-dotenv` (4.0.0) | compile | Carga variables de entorno desde `.env` al `Environment` de Spring al arrancar |
+| `spring-boot-starter-web` (vía CORS) | compile | Habilita CORS en `CorsConfig` para que el frontend en `localhost:5173` pueda llamar la API |
 | `org.postgresql:postgresql` | runtime | Driver JDBC de PostgreSQL (conexión a `colegioudea`) |
 | `com.h2database:h2` | test | Base de datos en memoria para correr `mvn test` sin necesidad de PostgreSQL local |
 | `org.projectlombok:lombok` | compile (annotation processor) | Genera getters/setters/builders; reduce boilerplate en DTOs, entities y services |
@@ -134,30 +159,55 @@ cd ParcialFinal-Arquitectura
    - **Owner:** `postgres`
 4. Click en **Save**. Solo eso. No tocar **Schemas** ni **Tables**.
 
-### 4. Configurar credenciales
+### 4. Configurar variables de entorno (`.env`)
 
-Editar `src/main/resources/application.properties` y reemplazar el password:
+Las credenciales de la base de datos **no** se editan en `application.properties`: se leen desde un archivo `.env` en la raíz del proyecto, gracias a la dependencia [`me.paulschwarz:spring-dotenv`](https://github.com/paulschwarz/spring-dotenv).
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/colegioudea
-spring.datasource.username=postgres
-spring.datasource.password=TU_PASSWORD_AQUI     # <-- reemplazar
-spring.datasource.driver-class-name=org.postgresql.Driver
+1. Copiar la plantilla y editar con los valores reales:
 
-spring.jpa.hibernate.ddl-auto=update           # crea/actualiza tablas automáticamente
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+   ```bash
+   # En PowerShell:
+   Copy-Item .env.example .env
+   notepad .env
 
-springdoc.swagger-ui.path=/swagger-ui.html
-```
+   # En bash / WSL / Git Bash:
+   cp .env.example .env
+   nano .env
+   ```
+
+2. Completar las variables (los nombres de los placeholders coinciden con los de `application.properties`):
+
+   ```env
+   POSTGRES_HOST=localhost
+   POSTGRES_PORT=5432
+   POSTGRES_DB=colegioudea
+   POSTGRES_USER=postgres
+   POSTGRES_PASSWORD=tu_password_real
+   ```
+
+3. Verificar que `src/main/resources/application.properties` usa los placeholders:
+
+   ```properties
+   spring.datasource.url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+   spring.datasource.username=${POSTGRES_USER}
+   spring.datasource.password=${POSTGRES_PASSWORD}
+   ```
+
+> **Importante:** `.env` está en `.gitignore` y **no se sube al repositorio**. Solo `.env.example` (la plantilla) se commitea, para que cualquiera pueda hacer `cp .env.example .env` y empezar.
 
 ### 5. Seed de datos
 
 Cargar los datos iniciales (8 estudiantes, 6 materias, 16 notas):
 
+```powershell
+# PowerShell
+$env:PGPASSWORD="tu_password_real"
+psql -U postgres -h localhost -d colegioudea -f seed.sql
+```
+
 ```bash
-psql -U postgres -d colegioudea -f seed.sql
+# bash / WSL
+PGPASSWORD=tu_password_real psql -U postgres -h localhost -d colegioudea -f seed.sql
 ```
 
 ### 6. Compilar y ejecutar
@@ -170,7 +220,8 @@ Los siguientes comandos están pensados para **PowerShell** en Windows:
 
 ```powershell
 # Detener cualquier instancia previa de la app
-taskkill /F /IM java.exe 2>$null
+Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue |
+  ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
 
 # Limpiar builds anteriores (opcional, evita clases cacheadas)
 Remove-Item -Recurse -Force target -ErrorAction SilentlyContinue
@@ -191,14 +242,17 @@ Tomcat started on port 8080 (http)
 
 #### Opción B: Docker
 
-Requisito: tener **Docker** instalado y PostgreSQL corriendo en `localhost:5432`.
+Requisito: tener **Docker** instalado, PostgreSQL corriendo en `localhost:5432` y el archivo `.env` ya creado (paso 4).
 
 ```bash
 # 1. Construir la imagen
 docker build -t parcialfinal .
 
-# 2. Ejecutar el contenedor (usando la red del host para conectar a PostgreSQL local)
-docker run --network host --name parcialfinal-app -d parcialfinal
+# 2. Ejecutar el contenedor montando el .env desde el host y usando la red del host
+#    para conectar a PostgreSQL local
+docker run --network host \
+  --env-file .env \
+  --name parcialfinal-app -d parcialfinal
 
 # 3. Verificar que está corriendo
 curl http://localhost:8080/api/v1/health
@@ -207,7 +261,7 @@ curl http://localhost:8080/api/v1/health
 docker rm -f parcialfinal-app
 ```
 
-> **Nota:** Se usa `--network host` para que el contenedor acceda a PostgreSQL en `localhost:5432` sin necesidad de configurar redes adicionales. Esto funciona en Linux. En macOS/Windows, usa `-p 8080:8080` y asegúrate de que PostgreSQL sea accesible desde dentro del contenedor.
+> **Nota:** Se usa `--network host` para que el contenedor acceda a PostgreSQL en `localhost:5432` sin necesidad de configurar redes adicionales. Esto funciona en Linux. En macOS/Windows, usa `-p 8080:8080` y asegúrate de que PostgreSQL sea accesible desde dentro del contenedor. Las variables se inyectan con `--env-file .env` (no se hardcodean en la imagen).
 
 ### 7. Probar la API
 
