@@ -10,8 +10,8 @@ API REST en **Spring Boot 3.5.14** para la gestión de **estudiantes, materias y
 
 | # | Nombre completo | Documento | Correo institucional |
 | - | --- | --- | --- |
-| 1 | Maria Fernanda Atencia | C.C. | [mariaf.atencia@udea.edu.co](mailto:mariaf.atencia@udea.edu.co) |
-| 2 | Michael Stiven Tabares | C.C. | [michael.tabares@udea.edu.co](mailto:michael.tabares@udea.edu.co) |
+| 1 | Maria Fernanda Atencia | C.C. 1064980223 | [mariaf.atencia@udea.edu.co](mailto:mariaf.atencia@udea.edu.co) |
+| 2 | Michael Stiven Tabares | C.C. 1036943803 | [michael.tabares@udea.edu.co](mailto:michael.tabares@udea.edu.co) |
 | 3 | Isabela Bedoya | C.C. 1020106520 | [isabela.bedoya@udea.edu.co](mailto:isabela.bedoya@udea.edu.co) |
 
 **Asignatura:** Arquitectura de Software — Semestre 7
